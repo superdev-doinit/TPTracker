@@ -109,7 +109,7 @@ ready(function () {
       $('width').value = 27;
       $('gsm').value = 15;
       $('sheets').value = 100;
-      $('rate').value = 70;
+      $('rate').value = 2;
       $('other').value = 2;
       $('ws_mark').value = 2;
       $('ret_mark').value = 4;
