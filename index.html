@@ -30,6 +30,7 @@
   <button type="button" class="tab-btn active" data-tab="calculator" role="tab" aria-selected="true">🧮 Calculator</button>
   <button type="button" class="tab-btn" data-tab="cheatsheet" role="tab" aria-selected="false">📋 Cheat Sheet</button>
   <button type="button" class="tab-btn" data-tab="survey" role="tab" aria-selected="false">📝 Survey</button>
+  <button type="button" class="tab-btn" data-tab="dashboard" role="tab" aria-selected="false">📈 Dashboard</button>
 </nav>
 
 <main>
@@ -478,11 +479,19 @@
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- Daily visits dashboard -->
-    <div class="card dashboard-card" id="dashboardCard" style="display: none;">
+  <!-- ============ DASHBOARD ============ -->
+  <section class="tab-panel" id="dashboard-panel" role="tabpanel">
+    <div class="card dashboard-card">
       <h2>📈 Daily visits</h2>
       <p class="muted">Snapshot of recent survey activity from the Google Sheet.</p>
+
+      <div class="dash-toolbar">
+        <button type="button" class="btn secondary" id="dashRefreshBtn">↻ Refresh</button>
+        <a id="dashViewSheet" href="https://docs.google.com/spreadsheets/d/1qIWJ16htvwjXoYUVYRr1kbgWqtfyBc6y4ysw7jRlB68/edit?usp=sharing" target="_blank" rel="noopener" class="btn secondary">📊 Open Sheet</a>
+        <span class="dash-updated" id="dashUpdated"></span>
+      </div>
 
       <div class="dash-grid">
         <div class="dash-stat big">

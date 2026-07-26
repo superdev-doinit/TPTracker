@@ -170,8 +170,14 @@
     flex-wrap: wrap;
   }
   /* Dashboard */
-  .dashboard-card { margin-top: 20px; }
+  .dashboard-card { max-width: 920px; margin: 0 auto; }
   .dashboard-card .muted { color: var(--muted); margin: 0 0 16px; }
+  .dash-toolbar {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .dash-toolbar .btn { padding: 8px 14px; font-size: 13px; }
+  .dash-updated { color: var(--muted); font-size: 12px; margin-left: auto; }
   .dash-grid {
     display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
     margin-bottom: 20px;

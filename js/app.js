@@ -28,6 +28,8 @@ ready(function () {
       const target = document.getElementById(targetId);
       if (target) target.classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Fire a custom event so other modules can react to tab changes
+      window.dispatchEvent(new CustomEvent('tabchange', { detail: { tab: btn.dataset.tab } }));
     };
     tabsBar.addEventListener('click', handler);
     tabsBar.addEventListener('touchend', handler, { passive: false });
@@ -379,7 +381,47 @@ ready(function () {
     renderBars(stats.byStoreType, 'dashStoreType');
     renderBars(stats.byRole, 'dashRole');
 
-    dashboardCard.style.display = 'block';
+    // "Last updated" timestamp
+    const updated = document.getElementById('dashUpdated');
+    if (updated) {
+      const now = new Date();
+      updated.textContent = 'Updated ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+  }
+
+  // Track when the dashboard tab is opened → fetch fresh stats
+  let dashLoaded = false;
+  window.addEventListener('tabchange', async (e) => {
+    if (e.detail.tab === 'dashboard') {
+      if (dashLoaded) return;
+      dashLoaded = true;
+      const stats = await fetchStats();
+      if (stats) renderDashboard(stats);
+    } else {
+      // reset so re-entering the tab reloads
+      dashLoaded = false;
+    }
+  });
+
+  // Dashboard refresh button
+  const dashRefreshBtn = document.getElementById('dashRefreshBtn');
+  if (dashRefreshBtn) {
+    dashRefreshBtn.addEventListener('click', async () => {
+      dashRefreshBtn.disabled = true;
+      dashRefreshBtn.textContent = '↻ Refreshing…';
+      const stats = await fetchStats();
+      if (stats) renderDashboard(stats);
+      dashRefreshBtn.disabled = false;
+      dashRefreshBtn.textContent = '↻ Refresh';
+    });
+  }
+
+  // "View dashboard" from thank-you screen → switch tabs
+  if (ty_dashboard) {
+    ty_dashboard.addEventListener('click', () => {
+      const dashTab = document.querySelector('.tab-btn[data-tab="dashboard"]');
+      if (dashTab) dashTab.click();
+    });
   }
 
   // ---- Submit handler ----
@@ -463,14 +505,7 @@ ready(function () {
 
   if (ty_another) ty_another.addEventListener('click', showFormAgain);
 
-  if (ty_dashboard) {
-    ty_dashboard.addEventListener('click', () => {
-      if (dashboardCard) {
-        dashboardCard.style.display = 'block';
-        dashboardCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-  }
+  // ty_dashboard handler is registered earlier (switches to the Dashboard tab)
 
   if (refreshStatsBtn) {
     refreshStatsBtn.addEventListener('click', async () => {
@@ -479,7 +514,8 @@ ready(function () {
       const stats = await fetchStats();
       if (stats) {
         renderStatsInline(stats);
-        renderDashboard(stats);
+        // Also refresh the dashboard if it's been loaded
+        if (dashLoaded) renderDashboard(stats);
       }
       refreshStatsBtn.disabled = false;
       refreshStatsBtn.textContent = '↻ Refresh stats';
