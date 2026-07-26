@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2f7a5f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="PJ Tracker" />
+  <meta name="description" content="PJ Tissue Paper — cost calculator and cheat sheet for floor staff. Works offline." />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <title>PJ Tissue Tracker</title>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">
+    <span class="brand-mark">🧻</span>
+    <div>
+      <h1>PJ Tissue Tracker</h1>
+      <p>Cost calculator &amp; cheat sheet — works offline</p>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button type="button" class="tab-btn active" data-tab="calculator" role="tab" aria-selected="true">🧮 Calculator</button>
+  <button type="button" class="tab-btn" data-tab="cheatsheet" role="tab" aria-selected="false">📋 Cheat Sheet</button>
+</nav>
+
+<main>
+  <!-- ============ CALCULATOR ============ -->
+  <section class="tab-panel active" id="calculator-panel" role="tabpanel">
+    <div class="layout">
+      <div class="card">
+        <h2>Inputs</h2>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="length">Length (machine roller) — cm</label>
+            <input type="number" id="length" value="27" min="1" step="0.1" inputmode="decimal" />
+          </div>
+          <div class="field">
+            <label for="width">Width (jumbo roll) — cm</label>
+            <input type="number" id="width" value="27" min="1" step="0.1" inputmode="decimal" />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="gsm">Tissue GSM (thickness: 15=1ply, 30=2ply, 45=3ply)</label>
+            <select id="gsm">
+              <option value="15" selected>15 GSM (1 ply)</option>
+              <option value="30">30 GSM (2 ply)</option>
+              <option value="45">45 GSM (3 ply)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sheets">Sheets per packet</label>
+            <select id="sheets">
+              <option value="100" selected>100</option>
+              <option value="85">85</option>
+              <option value="75">75</option>
+              <option value="70">70</option>
+              <option value="60">60</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="rate">Raw material rate — ₹/kg (lower = harder, higher = softer)</label>
+          <select id="rate">
+            <option value="60">₹60</option>
+            <option value="65">₹65</option>
+            <option value="70" selected>₹70</option>
+            <option value="75">₹75</option>
+            <option value="80">₹80</option>
+            <option value="90">₹90</option>
+            <option value="95">₹95</option>
+            <option value="100">₹100</option>
+            <option value="105">₹105</option>
+            <option value="110">₹110</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="other">Other expenses — ₹/packet (space, labor, electricity, poly, jumbo, misc.)</label>
+          <input type="number" id="other" value="2" min="0" step="0.1" inputmode="decimal" />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="ws_mark">Wholesale markup — ₹</label>
+            <input type="number" id="ws_mark" value="2" min="0" step="0.1" inputmode="decimal" />
+          </div>
+          <div class="field">
+            <label for="ret_mark">Retail markup — ₹</label>
+            <input type="number" id="ret_mark" value="4" min="0" step="0.1" inputmode="decimal" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Live Calculation</h2>
+
+        <div class="formula" id="formula">
+          Per Packet Weight (g) = (L × W × GSM × Sheets per packet) / 10000
+        </div>
+
+        <div class="results">
+          <div class="result-row">
+            <span class="lbl">Shape quality (L:W ratio)</span>
+            <span class="val"><span id="r_shape" class="shape-pill">—</span></span>
+          </div>
+          <div class="result-row">
+            <span class="lbl">Per-packet weight</span>
+            <span class="val"><span id="r_weight">—</span> g</span>
+          </div>
+          <div class="result-row">
+            <span class="lbl">Packets per kg</span>
+            <span class="val" id="r_per_kg">—</span>
+          </div>
+          <div class="result-row">
+            <span class="lbl">Paper cost per packet</span>
+            <span class="val">₹ <span id="r_paper">—</span></span>
+          </div>
+          <div class="result-row">
+            <span class="lbl">Other expenses</span>
+            <span class="val">₹ <span id="r_other">—</span></span>
+          </div>
+          <div class="result-row highlight">
+            <span class="lbl">Total cost per packet</span>
+            <span class="val">₹ <span id="r_total">—</span></span>
+          </div>
+          <div class="result-row price">
+            <span class="lbl">Wholesale price</span>
+            <span class="val">₹ <span id="r_ws">—</span></span>
+          </div>
+          <div class="result-row price">
+            <span class="lbl">Retail price</span>
+            <span class="val">₹ <span id="r_ret">—</span></span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn" id="resetBtn">Reset to defaults</button>
+          <button type="button" class="btn secondary" onclick="window.print()">Print</button>
+        </div>
+
+        <div class="note">
+          <strong>Heads up:</strong> "Other expenses ~ ₹2 per day" reads like a per-day overhead, not per-packet.
+          Default is <strong>₹2 per packet</strong> — change the "Other expenses" field if your real model
+          divides the ₹2 across daily production.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHEAT SHEET ============ -->
+  <section class="tab-panel" id="cheatsheet-panel" role="tabpanel">
+    <div class="actions">
+      <button type="button" class="btn secondary" onclick="window.print()">🖨️ Print cheat sheet</button>
+    </div>
+
+    <div class="cheat-section card">
+      <h3>Step-by-step calculation</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Per Packet Weight (grams)</strong>
+          <code>(L × W × GSM × Sheets per packet) / 10000</code>
+          <p style="margin: 4px 0 0; color: var(--muted); font-size: 13px;">
+            Where L = length in cm, W = width in cm, GSM = grams per sq. meter per ply,
+            Sheets = sheets in the packet (100, 85, 75, 70, 60, or 50).
+          </p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Packets per kg</strong>
+          <code>1000 / Per Packet Weight</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Paper cost per packet</strong>
+          <code>Raw Material Rate (₹/kg) / Packets per kg</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Total cost per packet</strong>
+          <code>Paper cost + Other expenses</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Wholesale price</strong> <code>Total cost + ₹2</code>
+          &nbsp;&nbsp;·&nbsp;&nbsp;
+          <strong>Retail price</strong> <code>Total cost + ₹4</code>
+        </div>
+      </div>
+      <div class="note" style="margin-top: 12px;">
+        <strong>Shape rule of thumb:</strong> square (L = W) is the best tissue shape.
+        Near-square (|L − W| ≤ 10% of the smaller side, i.e. ratio up to ~1.10:1) is also good.
+        Anything more rectangular than that isn't a standard tissue shape and should be reviewed.
+      </div>
+    </div>
+
+    <div class="cheat-section card">
+      <h3>Allowed values cheat table</h3>
+      <table>
+        <thead>
+          <tr><th>Variable</th><th>Symbol</th><th>Allowed values</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Length (roller)</td><td>L</td><td>27, 28, 29, 30, 31, 32, 33 cm</td></tr>
+          <tr><td>Width (jumbo)</td><td>W</td><td>27, 28, 29, 30, 31, 32, 33 cm</td></tr>
+          <tr><td>Tissue GSM (thickness)</td><td>GSM</td><td>15 = 1ply, 30 = 2ply, 45 = 3ply</td></tr>
+          <tr><td>Sheets per packet</td><td>S</td><td>100, 85, 75, 70, 60, 50</td></tr>
+          <tr><td>Raw material rate (softness)</td><td>R</td><td>₹60, 65, 70, 75, 80, 90, 95, 100, 105, 110 / kg — lower = harder, higher = softer</td></tr>
+          <tr><td>Other expenses</td><td>O</td><td>~ ₹2 / packet (configurable)</td></tr>
+          <tr><td>Wholesale markup</td><td>—</td><td>+ ₹2 over total cost</td></tr>
+          <tr><td>Retail markup</td><td>—</td><td>+ ₹4 over total cost</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cheat-section card">
+      <h3>Full combination matrix — Total cost per packet (₹)</h3>
+      <p>
+        Every allowed L × W × GSM × Sheets combination. 7 × 7 × 3 × 6 = <strong>882 rows</strong> total,
+        split into 3 tables by GSM. Rows = L, W. Columns = sheets per packet.
+        Configure the rate and overhead below — matrix updates instantly.
+      </p>
+
+      <div class="matrix-bar">
+        <div class="field">
+          <label for="m_rate">Raw material rate — ₹/kg (lower = harder, higher = softer)</label>
+          <select id="m_rate">
+            <option value="60">₹60</option>
+            <option value="65">₹65</option>
+            <option value="70" selected>₹70</option>
+            <option value="75">₹75</option>
+            <option value="80">₹80</option>
+            <option value="90">₹90</option>
+            <option value="95">₹95</option>
+            <option value="100">₹100</option>
+            <option value="105">₹105</option>
+            <option value="110">₹110</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="m_other">Other expenses — ₹/packet</label>
+          <input type="number" id="m_other" value="2" min="0" step="0.1" inputmode="decimal" style="width: 80px;" />
+        </div>
+        <div class="field">
+          <label for="m_show">Show column</label>
+          <select id="m_show">
+            <option value="total" selected>Total cost</option>
+            <option value="weight">Packet weight (g)</option>
+            <option value="paper">Paper cost</option>
+            <option value="ws">Wholesale</option>
+            <option value="ret">Retail</option>
+          </select>
+        </div>
+        <div class="m-meta" id="m_meta">—</div>
+      </div>
+
+      <div class="matrix-legend">
+        <span><b>Total cost</b> = paper cost + overhead</span>
+        <span><b>Wholesale</b> = total + ₹2</span>
+        <span><b>Retail</b> = total + ₹4</span>
+      </div>
+
+      <div class="matrix-legend" style="margin-top: 4px;">
+        <span><span class="shape-pill best">■ Square</span> L = W — ideal</span>
+        <span><span class="shape-pill good">▣ Near-square</span> L:W within 10% — good</span>
+        <span><span class="shape-pill bad">▭ Rectangular</span> L:W &gt; 1.10:1 — not a standard tissue</span>
+      </div>
+
+      <div id="matrix_container"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <span>PJ Tissue Tracker · v1.0</span>
+  <span class="offline-status" id="offlineStatus">●&nbsp;Online</span>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
