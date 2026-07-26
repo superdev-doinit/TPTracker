@@ -29,6 +29,7 @@
 <nav class="tabs" role="tablist">
   <button type="button" class="tab-btn active" data-tab="calculator" role="tab" aria-selected="true">🧮 Calculator</button>
   <button type="button" class="tab-btn" data-tab="cheatsheet" role="tab" aria-selected="false">📋 Cheat Sheet</button>
+  <button type="button" class="tab-btn" data-tab="survey" role="tab" aria-selected="false">📝 Survey</button>
 </nav>
 
 <main>
@@ -282,6 +283,161 @@
       </div>
 
       <div id="matrix_container"></div>
+    </div>
+  </section>
+
+  <!-- ============ SURVEY ============ -->
+  <section class="tab-panel" id="survey-panel" role="tabpanel">
+    <div class="card survey-card">
+      <h2>Store Survey</h2>
+      <p class="survey-intro">Quick form to capture details from each store you visit. Tap <strong>Submit</strong> when done — your response goes straight to the team's Google Sheet.</p>
+
+      <form id="surveyForm" class="survey-form" novalidate>
+        <fieldset>
+          <legend>Contact</legend>
+          <div class="field-row">
+            <div class="field">
+              <label for="s_name">Name <span class="req">*</span></label>
+              <input type="text" id="s_name" name="name" required autocomplete="name" placeholder="Store owner / manager name" />
+            </div>
+            <div class="field">
+              <label for="s_phone">Phone <span class="req">*</span></label>
+              <input type="tel" id="s_phone" name="phone" required autocomplete="tel" inputmode="tel" placeholder="10-digit mobile" pattern="[0-9 +\-]{7,15}" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Store details</legend>
+          <div class="field">
+            <label for="s_storeType">Store type <span class="req">*</span></label>
+            <select id="s_storeType" name="storeType" required>
+              <option value="">— Select —</option>
+              <option value="Retail">Retail / Kirana</option>
+              <option value="Restaurant">Restaurant / Café</option>
+              <option value="Hospital">Hospital / Clinic</option>
+              <option value="Hotel">Hotel / Hospitality</option>
+              <option value="Salon">Salon / Spa</option>
+              <option value="Office">Office / Corporate</option>
+              <option value="School">School / College</option>
+              <option value="Other">Other (specify below)</option>
+            </select>
+          </div>
+          <div class="field" id="s_storeTypeOtherWrap" style="display: none;">
+            <label for="s_storeTypeOther">Other store type</label>
+            <input type="text" id="s_storeTypeOther" name="storeTypeOther" placeholder="e.g. Gym, Airport lounge" />
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Current tissue specs</legend>
+          <div class="field-row">
+            <div class="field">
+              <label for="s_length">Length (cm)</label>
+              <select id="s_length" name="length">
+                <option value="">—</option>
+                <option value="27">27</option><option value="28">28</option>
+                <option value="29">29</option><option value="30">30</option>
+                <option value="31">31</option><option value="32">32</option>
+                <option value="33">33</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="s_width">Width (cm)</label>
+              <select id="s_width" name="width">
+                <option value="">—</option>
+                <option value="27">27</option><option value="28">28</option>
+                <option value="29">29</option><option value="30">30</option>
+                <option value="31">31</option><option value="32">32</option>
+                <option value="33">33</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="s_ply">Ply</label>
+              <select id="s_ply" name="ply">
+                <option value="">—</option>
+                <option value="1">1 ply</option>
+                <option value="2">2 ply</option>
+                <option value="3">3 ply</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="s_cost">Cost to store (₹ per packet)</label>
+            <input type="number" id="s_cost" name="costToStore" min="0" step="0.5" inputmode="decimal" placeholder="e.g. 30" />
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Consumption</legend>
+          <div class="field-row">
+            <div class="field">
+              <label for="s_consumption">Consumption</label>
+              <input type="number" id="s_consumption" name="consumption" min="0" step="1" inputmode="numeric" placeholder="e.g. 500" />
+            </div>
+            <div class="field">
+              <label for="s_metric">Metric</label>
+              <select id="s_metric" name="consumptionMetric">
+                <option value="">—</option>
+                <option value="Per day">Per day</option>
+                <option value="Per week">Per week</option>
+                <option value="Per month" selected>Per month</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Branding &amp; vendor</legend>
+          <div class="field">
+            <label>Has logo on current tissue?</label>
+            <div class="radio-row">
+              <label class="radio"><input type="radio" name="hasLogo" value="Yes" /> Yes</label>
+              <label class="radio"><input type="radio" name="hasLogo" value="No" /> No</label>
+              <label class="radio"><input type="radio" name="hasLogo" value="Wants one" /> Wants one</label>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="s_vendorNumber">Vendor number</label>
+              <input type="text" id="s_vendorNumber" name="vendorNumber" placeholder="Current vendor's phone" />
+            </div>
+            <div class="field">
+              <label for="s_vendorDetail">Vendor detail</label>
+              <input type="text" id="s_vendorDetail" name="vendorDetail" placeholder="Brand / shop name" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Interest</legend>
+          <div class="field">
+            <label>Interested in a website or app for their store?</label>
+            <div class="radio-row">
+              <label class="radio"><input type="radio" name="interestedIn" value="Website" /> Website</label>
+              <label class="radio"><input type="radio" name="interestedIn" value="App" /> App</label>
+              <label class="radio"><input type="radio" name="interestedIn" value="Both" /> Both</label>
+              <label class="radio"><input type="radio" name="interestedIn" value="Neither" checked /> Neither</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="s_notes">Notes</label>
+            <textarea id="s_notes" name="notes" rows="3" placeholder="Anything else worth recording..."></textarea>
+          </div>
+        </fieldset>
+
+        <div class="survey-actions">
+          <button type="submit" class="btn" id="submitBtn">Submit survey</button>
+          <button type="button" class="btn secondary" id="clearBtn">Clear form</button>
+        </div>
+
+        <div id="surveyStatus" class="survey-status" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <div class="note">
+      <strong>Setup status:</strong> <span id="setupStatus">checking…</span>
+      <span id="setupDetail"></span>
     </div>
   </section>
 </main>

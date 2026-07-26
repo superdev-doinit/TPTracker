@@ -216,4 +216,115 @@ ready(function () {
   window.addEventListener('offline', updateOnlineStatus);
   updateOnlineStatus();
 
+  // ============================================================
+  //  SURVEY FORM
+  // ============================================================
+  // After deploying Code.gs as a Web App, paste the URL here:
+  const SURVEY_ENDPOINT = ''; // e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
+
+  const form = document.getElementById('surveyForm');
+  const status = document.getElementById('surveyStatus');
+  const submitBtn = document.getElementById('submitBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const setupStatus = document.getElementById('setupStatus');
+  const setupDetail = document.getElementById('setupDetail');
+
+  function setStatus(msg, kind) {
+    if (!status) return;
+    status.textContent = msg;
+    status.className = 'survey-status ' + (kind || '');
+  }
+
+  // Show whether the Apps Script endpoint is configured
+  if (setupStatus) {
+    if (SURVEY_ENDPOINT) {
+      setupStatus.textContent = '✓ Connected to Google Sheets';
+      setupStatus.style.color = '#1f6b4a';
+      setupStatus.style.fontWeight = '600';
+      if (setupDetail) setupDetail.textContent = ' — submissions go straight to your Sheet.';
+    } else {
+      setupStatus.textContent = '⚠ Not connected yet';
+      setupStatus.style.color = '#a83a25';
+      setupStatus.style.fontWeight = '600';
+      if (setupDetail) {
+        setupDetail.innerHTML =
+          ' — open <code>Code.gs</code> in the repo, follow the deploy steps, ' +
+          'and paste the Web App URL into <code>js/app.js</code> (look for <code>SURVEY_ENDPOINT</code>).';
+      }
+    }
+  }
+
+  // Show/hide the "Other" store type input
+  const storeTypeSel = document.getElementById('s_storeType');
+  const otherWrap = document.getElementById('s_storeTypeOtherWrap');
+  if (storeTypeSel && otherWrap) {
+    storeTypeSel.addEventListener('change', () => {
+      otherWrap.style.display = storeTypeSel.value === 'Other' ? '' : 'none';
+    });
+  }
+
+  function collectForm() {
+    const fd = new FormData(form);
+    const data = {};
+    fd.forEach((v, k) => { data[k] = v; });
+    return data;
+  }
+
+  function validate(data) {
+    if (!data.name || !data.name.trim()) return 'Name is required.';
+    if (!data.phone || !data.phone.trim()) return 'Phone is required.';
+    if (!/^[0-9 +\-]{7,15}$/.test(data.phone.trim())) return 'Phone looks invalid.';
+    if (!data.storeType) return 'Please select a store type.';
+    if (data.storeType === 'Other' && (!data.storeTypeOther || !data.storeTypeOther.trim()))
+      return 'Please describe the store type.';
+    return null;
+  }
+
+  async function submitSurvey(e) {
+    e.preventDefault();
+    if (!SURVEY_ENDPOINT) {
+      setStatus('Backend not configured yet. See Code.gs deploy steps below.', 'err');
+      return;
+    }
+    const data = collectForm();
+    const err = validate(data);
+    if (err) { setStatus(err, 'err'); return; }
+
+    setStatus('Submitting…', 'pending');
+    submitBtn.disabled = true;
+    try {
+      // Google Apps Script expects text/plain (CORS quirk) — JSON.stringify works.
+      const res = await fetch(SURVEY_ENDPOINT, {
+        method: 'POST',
+        // No custom headers — Apps Script rejects requests with non-simple headers
+        body: JSON.stringify(data)
+      });
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch { json = { ok: res.ok, raw: text }; }
+      if (res.ok && json.ok !== false) {
+        setStatus('✓ Saved to Google Sheets. Thank you!', 'ok');
+        form.reset();
+        if (otherWrap) otherWrap.style.display = 'none';
+      } else {
+        setStatus('Save failed: ' + (json.error || res.statusText || 'unknown error'), 'err');
+      }
+    } catch (networkErr) {
+      setStatus('Network error: ' + networkErr.message + '. Check connectivity and the endpoint URL.', 'err');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  if (form) {
+    form.addEventListener('submit', submitSurvey);
+  }
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      form.reset();
+      if (otherWrap) otherWrap.style.display = 'none';
+      setStatus('', '');
+    });
+  }
+
 }); // end ready()

@@ -50,6 +50,60 @@
     margin-left: auto; font-size: 12px; color: var(--muted);
     align-self: center;
   }
+  /* Survey form */
+  .survey-card { max-width: 760px; margin: 0 auto; }
+  .survey-intro { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  .survey-form fieldset {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px 16px;
+    margin: 0 0 16px;
+    background: #fafaf7;
+  }
+  .survey-form legend {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--accent);
+    font-weight: 700;
+    padding: 0 8px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .survey-form .field { margin-bottom: 12px; }
+  .survey-form .field:last-child { margin-bottom: 0; }
+  .req { color: var(--warn); font-weight: 700; }
+  .radio-row {
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .radio {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: white; border: 1px solid var(--line);
+    border-radius: 6px; padding: 8px 12px;
+    font-size: 14px; cursor: pointer;
+    min-height: 40px;
+  }
+  .radio input { accent-color: var(--accent); }
+  textarea {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--line);
+    border-radius: 6px; font-size: 14px; background: #fafaf7;
+    color: var(--ink); font-family: inherit; resize: vertical;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); background: #fff; }
+  .survey-actions {
+    display: flex; gap: 10px; margin-top: 8px;
+    position: sticky; bottom: 0; background: var(--card);
+    padding: 12px 0; border-top: 1px solid var(--line);
+  }
+  .survey-actions .btn { flex: 1; padding: 12px 16px; font-size: 15px; }
+  .survey-status {
+    margin-top: 10px; padding: 10px 14px; border-radius: 6px;
+    font-size: 14px; display: none;
+  }
+  .survey-status.ok { display: block; background: var(--accent-soft); color: #1f6b4a; border: 1px solid var(--accent); }
+  .survey-status.err { display: block; background: #fbe6e2; color: #a83a25; border: 1px solid var(--warn); }
+  .survey-status.pending { display: block; background: #fff8ec; color: #6b5300; border: 1px solid #d4a017; }
   .tabs {
     display: flex;
     gap: 4px;
@@ -97,6 +151,9 @@
     header { padding: 20px 16px 12px; }
     .tabs { padding: 12px 16px 0; }
     .tab-panel { padding: 16px; }
+    .survey-form fieldset { padding: 12px; }
+    .radio-row { gap: 6px; }
+    .radio { padding: 6px 10px; font-size: 13px; }
   }
   .card {
     background: var(--card);
