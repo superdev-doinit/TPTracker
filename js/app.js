@@ -220,7 +220,7 @@ ready(function () {
   //  SURVEY FORM
   // ============================================================
   // After deploying Code.gs as a Web App, paste the URL here:
-  const SURVEY_ENDPOINT = ''; // e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
+  const SURVEY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzahOY06Aa-qGjpZOlXiSzdEnTN91zLeqn_zQlBEJQ5jPFbtyWYsaNgaRcwrDBblwlb/exec';
 
   const form = document.getElementById('surveyForm');
   const status = document.getElementById('surveyStatus');
