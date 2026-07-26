@@ -317,15 +317,13 @@
       <form id="surveyForm" class="survey-form" novalidate>
         <fieldset>
           <legend>Contact</legend>
-          <div class="field-row">
-            <div class="field">
-              <label for="s_name">Name <span class="req">*</span></label>
-              <input type="text" id="s_name" name="name" required autocomplete="name" placeholder="Contact person name" />
-            </div>
-            <div class="field">
-              <label for="s_phone">Phone <span class="req">*</span></label>
-              <input type="tel" id="s_phone" name="phone" required autocomplete="tel" inputmode="tel" placeholder="10-digit mobile" pattern="[0-9 +\-]{7,15}" />
-            </div>
+          <div class="field">
+            <label for="s_name">Name <span class="req">*</span></label>
+            <input type="text" id="s_name" name="name" required autocomplete="name" placeholder="Contact person name" />
+          </div>
+          <div class="field">
+            <label for="s_phone">Phone <span class="req">*</span></label>
+            <input type="tel" id="s_phone" name="phone" required autocomplete="tel" inputmode="numeric" pattern="[0-9 +\-]{7,15}" placeholder="10-digit mobile" maxlength="15" />
           </div>
           <div class="field">
             <label>Role <span class="req">*</span></label>
@@ -433,15 +431,13 @@
               <label class="radio"><input type="radio" name="hasLogo" value="Wants one" /> Wants one</label>
             </div>
           </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="s_vendorNumber">Vendor number</label>
-              <input type="text" id="s_vendorNumber" name="vendorNumber" placeholder="Current vendor's phone" />
-            </div>
-            <div class="field">
-              <label for="s_vendorDetail">Vendor detail</label>
-              <input type="text" id="s_vendorDetail" name="vendorDetail" placeholder="Brand / shop name" />
-            </div>
+          <div class="field">
+            <label for="s_vendorDetail">Vendor name / detail</label>
+            <input type="text" id="s_vendorDetail" name="vendorDetail" placeholder="Brand or shop name" />
+          </div>
+          <div class="field">
+            <label for="s_vendorNumber">Vendor number</label>
+            <input type="tel" id="s_vendorNumber" name="vendorNumber" inputmode="numeric" pattern="[0-9 +\-]{7,15}" placeholder="Vendor phone" maxlength="15" />
           </div>
         </fieldset>
 
