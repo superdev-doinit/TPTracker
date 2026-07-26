@@ -217,10 +217,10 @@ ready(function () {
   updateOnlineStatus();
 
   // ============================================================
-  //  SURVEY FORM
+  //  SURVEY FORM + DASHBOARD
   // ============================================================
-  // After deploying Code.gs as a Web App, paste the URL here:
   const SURVEY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzahOY06Aa-qGjpZOlXiSzdEnTN91zLeqn_zQlBEJQ5jPFbtyWYsaNgaRcwrDBblwlb/exec';
+  const SHEET_VIEW_URL  = 'https://docs.google.com/spreadsheets/d/1qIWJ16htvwjXoYUVYRr1kbgWqtfyBc6y4ysw7jRlB68/edit?usp=sharing';
 
   const form = document.getElementById('surveyForm');
   const status = document.getElementById('surveyStatus');
@@ -228,6 +228,18 @@ ready(function () {
   const clearBtn = document.getElementById('clearBtn');
   const setupStatus = document.getElementById('setupStatus');
   const setupDetail = document.getElementById('setupDetail');
+  const setupDot = document.getElementById('setupDot');
+  const viewResponsesLink = document.getElementById('viewResponsesLink');
+  const refreshStatsBtn = document.getElementById('refreshStatsBtn');
+  const thankYou = document.getElementById('thankYou');
+  const ty_name = document.getElementById('ty_name');
+  const ty_business = document.getElementById('ty_business');
+  const ty_stats = document.getElementById('ty_stats');
+  const ty_another = document.getElementById('ty_another');
+  const ty_dashboard = document.getElementById('ty_dashboard');
+  const dashboardCard = document.getElementById('dashboardCard');
+
+  if (viewResponsesLink) viewResponsesLink.href = SHEET_VIEW_URL;
 
   function setStatus(msg, kind) {
     if (!status) return;
@@ -235,23 +247,19 @@ ready(function () {
     status.className = 'survey-status ' + (kind || '');
   }
 
-  // Show whether the Apps Script endpoint is configured
-  if (setupStatus) {
-    if (SURVEY_ENDPOINT) {
-      setupStatus.textContent = '✓ Connected to Google Sheets';
-      setupStatus.style.color = '#1f6b4a';
-      setupStatus.style.fontWeight = '600';
-      if (setupDetail) setupDetail.textContent = ' — submissions go straight to your Sheet.';
-    } else {
-      setupStatus.textContent = '⚠ Not connected yet';
-      setupStatus.style.color = '#a83a25';
-      setupStatus.style.fontWeight = '600';
-      if (setupDetail) {
-        setupDetail.innerHTML =
-          ' — open <code>Code.gs</code> in the repo, follow the deploy steps, ' +
-          'and paste the Web App URL into <code>js/app.js</code> (look for <code>SURVEY_ENDPOINT</code>).';
-      }
-    }
+  function setSetup(state, msg, detailHtml) {
+    if (!setupStatus) return;
+    setupStatus.textContent = msg;
+    if (setupDetail) setupDetail.innerHTML = detailHtml || '';
+    if (setupDot) setupDot.className = 'setup-dot' + (state === 'ok' ? '' : ' warn');
+  }
+
+  // Initial setup indicator
+  if (SURVEY_ENDPOINT) {
+    setSetup('ok', 'Connected to Google Sheets', ' — fetching stats…');
+  } else {
+    setSetup('warn', 'Not connected yet',
+      ' — deploy <code>Code.gs</code> and paste the Web App URL into <code>js/app.js</code>.');
   }
 
   // Show/hide the "Other" store type input
@@ -282,6 +290,100 @@ ready(function () {
     return null;
   }
 
+  // ---- Fetch stats from the Apps Script ----
+  async function fetchStats() {
+    if (!SURVEY_ENDPOINT) return null;
+    try {
+      const url = SURVEY_ENDPOINT + '?action=stats&t=' + Date.now();
+      const res = await fetch(url, { method: 'GET' });
+      const text = await res.text();
+      // Strip the 302 redirect HTML if present — Apps Script sometimes
+      // wraps JSON in HTML. Look for the first '{' and last '}'.
+      const first = text.indexOf('{');
+      const last = text.lastIndexOf('}');
+      if (first === -1 || last === -1) return null;
+      return JSON.parse(text.slice(first, last + 1));
+    } catch (e) {
+      console.warn('Stats fetch failed:', e);
+      return null;
+    }
+  }
+
+  function renderStatsInline(stats) {
+    if (!stats) return;
+    document.getElementById('statTotal').textContent = stats.total;
+    document.getElementById('statToday').textContent = stats.today;
+    document.getElementById('statWeek').textContent  = stats.week;
+    document.getElementById('statApp').textContent   = stats.interestedApp;
+    document.getElementById('statsRow').style.display = 'grid';
+    renderMiniChart(stats.byDay);
+  }
+
+  function renderMiniChart(byDay) {
+    const chart = document.getElementById('dayChart');
+    const wrap  = document.getElementById('chartWrap');
+    if (!chart || !byDay || !byDay.length) return;
+    const max = Math.max.apply(null, byDay.map(d => d.count)) || 1;
+    const today = byDay.length ? byDay[byDay.length - 1].date : null;
+    chart.innerHTML = byDay.map(d => {
+      const h = Math.max(2, Math.round((d.count / max) * 50));
+      const dayShort = d.date.slice(5); // MM-DD
+      const cls = 'day-bar' + (d.date === today ? ' today' : '');
+      return `<div class="${cls}" style="height: ${h}px;" title="${d.date}: ${d.count}">
+        <span class="val">${d.count || ''}</span>
+        <span class="lbl">${dayShort}</span>
+      </div>`;
+    }).join('');
+    wrap.style.display = 'block';
+  }
+
+  function renderDashboard(stats) {
+    if (!stats) return;
+    document.getElementById('dash_total').textContent   = stats.total;
+    document.getElementById('dash_today').textContent   = stats.today;
+    document.getElementById('dash_week').textContent    = stats.week;
+    document.getElementById('dash_website').textContent = stats.interestedWebsite;
+    document.getElementById('dash_app').textContent     = stats.interestedApp;
+
+    // Big 7-day chart
+    const dashChart = document.getElementById('dashChart');
+    if (stats.byDay && stats.byDay.length) {
+      const max = Math.max.apply(null, stats.byDay.map(d => d.count)) || 1;
+      const today = stats.byDay[stats.byDay.length - 1].date;
+      dashChart.innerHTML = stats.byDay.map(d => {
+        const h = Math.max(2, Math.round((d.count / max) * 100));
+        const cls = 'day-bar' + (d.date === today ? ' today' : '');
+        return `<div class="${cls}" style="height: ${h}px;" title="${d.date}: ${d.count}">
+          <span class="val">${d.count || ''}</span>
+          <span class="lbl">${d.date.slice(5)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // Bar lists
+    const renderBars = (obj, targetId) => {
+      const entries = Object.entries(obj || {}).sort((a, b) => b[1] - a[1]);
+      const max = Math.max.apply(null, entries.map(e => e[1])) || 1;
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      if (!entries.length) { target.innerHTML = '<p class="muted">No data yet.</p>'; return; }
+      target.innerHTML = entries.map(([name, count]) => {
+        const w = Math.round((count / max) * 100);
+        return `<div class="bar-row">
+          <span class="bar-name">${name}</span>
+          <span class="bar-track"><span class="bar-fill" style="width: ${w}%;"></span></span>
+          <span class="bar-count">${count}</span>
+        </div>`;
+      }).join('');
+    };
+    renderBars(stats.byStoreType, 'dashStoreType');
+    renderBars(stats.byRole, 'dashRole');
+
+    dashboardCard.style.display = 'block';
+  }
+
+  // ---- Submit handler ----
+  let lastSubmission = null;
   async function submitSurvey(e) {
     e.preventDefault();
     if (!SURVEY_ENDPOINT) {
@@ -295,32 +397,62 @@ ready(function () {
     setStatus('Submitting…', 'pending');
     submitBtn.disabled = true;
     try {
-      // Google Apps Script expects text/plain (CORS quirk) — JSON.stringify works.
       const res = await fetch(SURVEY_ENDPOINT, {
         method: 'POST',
-        // No custom headers — Apps Script rejects requests with non-simple headers
+        // No custom headers — Apps Script requires simple CORS
         body: JSON.stringify(data)
       });
+      // Apps Script returns JSON wrapped in a 302 HTML page; strip the HTML.
       const text = await res.text();
-      let json;
-      try { json = JSON.parse(text); } catch { json = { ok: res.ok, raw: text }; }
-      if (res.ok && json.ok !== false) {
-        setStatus('✓ Saved to Google Sheets. Thank you!', 'ok');
-        form.reset();
-        if (otherWrap) otherWrap.style.display = 'none';
+      const first = text.indexOf('{');
+      const last = text.lastIndexOf('}');
+      let json = null;
+      if (first !== -1 && last !== -1) {
+        try { json = JSON.parse(text.slice(first, last + 1)); } catch {}
+      }
+      if ((res.ok || res.status === 302) && (!json || json.ok !== false)) {
+        lastSubmission = { name: data.name, business: data.businessName };
+        setStatus('', '');
+        // Hide form, show thank-you
+        form.style.display = 'none';
+        if (ty_name) ty_name.textContent = data.name.split(' ')[0] || data.name;
+        if (ty_business) ty_business.textContent = data.businessName;
+        if (thankYou) {
+          thankYou.style.display = 'block';
+          thankYou.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        // Refresh stats
+        const stats = await fetchStats();
+        if (stats) {
+          renderStatsInline(stats);
+          if (ty_stats) {
+            const s = stats;
+            ty_stats.textContent =
+              `That's survey #${s.total}. ` +
+              `${s.today} submitted today, ${s.week} this week.`;
+          }
+        }
       } else {
-        setStatus('Save failed: ' + (json.error || res.statusText || 'unknown error'), 'err');
+        setStatus('Save failed: ' + ((json && json.error) || res.statusText || 'unknown'), 'err');
       }
     } catch (networkErr) {
-      setStatus('Network error: ' + networkErr.message + '. Check connectivity and the endpoint URL.', 'err');
+      setStatus('Network error: ' + networkErr.message + '. Check connectivity.', 'err');
     } finally {
       submitBtn.disabled = false;
     }
   }
 
-  if (form) {
-    form.addEventListener('submit', submitSurvey);
+  function showFormAgain() {
+    form.reset();
+    if (otherWrap) otherWrap.style.display = 'none';
+    form.style.display = '';
+    if (thankYou) thankYou.style.display = 'none';
+    setStatus('', '');
+    document.getElementById('s_name').focus();
   }
+
+  if (form) form.addEventListener('submit', submitSurvey);
+
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
       form.reset();
@@ -328,5 +460,43 @@ ready(function () {
       setStatus('', '');
     });
   }
+
+  if (ty_another) ty_another.addEventListener('click', showFormAgain);
+
+  if (ty_dashboard) {
+    ty_dashboard.addEventListener('click', () => {
+      if (dashboardCard) {
+        dashboardCard.style.display = 'block';
+        dashboardCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+
+  if (refreshStatsBtn) {
+    refreshStatsBtn.addEventListener('click', async () => {
+      refreshStatsBtn.disabled = true;
+      refreshStatsBtn.textContent = '↻ Refreshing…';
+      const stats = await fetchStats();
+      if (stats) {
+        renderStatsInline(stats);
+        renderDashboard(stats);
+      }
+      refreshStatsBtn.disabled = false;
+      refreshStatsBtn.textContent = '↻ Refresh stats';
+    });
+  }
+
+  // Initial stats fetch on load
+  (async () => {
+    const stats = await fetchStats();
+    if (stats) {
+      setSetup('ok', '✓ Connected to Google Sheets',
+        ` — ${stats.total} ${stats.total === 1 ? 'survey' : 'surveys'} so far, ${stats.today} today.`);
+      renderStatsInline(stats);
+    } else if (SURVEY_ENDPOINT) {
+      setSetup('warn', 'Connected, but stats unavailable',
+        ' — the Sheet may be empty or the script is still warming up.');
+    }
+  })();
 
 }); // end ready()

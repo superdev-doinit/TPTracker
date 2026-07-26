@@ -292,6 +292,28 @@
       <h2>Store Survey</h2>
       <p class="survey-intro">Quick form to capture details from each store you visit. Tap <strong>Submit</strong> when done — your response goes straight to the team's Google Sheet.</p>
 
+      <div id="surveySetup" class="setup-banner">
+        <div class="setup-line">
+          <span class="setup-dot" id="setupDot">●</span>
+          <span id="setupStatus">checking…</span>
+          <span id="setupDetail"></span>
+        </div>
+        <div class="setup-actions">
+          <a id="viewResponsesLink" href="https://docs.google.com/spreadsheets/d/1qIWJ16htvwjXoYUVYRr1kbgWqtfyBc6y4ysw7jRlB68/edit?usp=sharing" target="_blank" rel="noopener" class="btn-link">📊 View responses in Google Sheets</a>
+          <button type="button" class="btn-link" id="refreshStatsBtn">↻ Refresh stats</button>
+        </div>
+        <div class="stats-row" id="statsRow" style="display: none;">
+          <div class="stat"><span class="stat-num" id="statTotal">—</span><span class="stat-lbl">Total</span></div>
+          <div class="stat"><span class="stat-num" id="statToday">—</span><span class="stat-lbl">Today</span></div>
+          <div class="stat"><span class="stat-num" id="statWeek">—</span><span class="stat-lbl">This week</span></div>
+          <div class="stat"><span class="stat-num" id="statApp">—</span><span class="stat-lbl">Want app</span></div>
+        </div>
+        <div id="chartWrap" class="chart-wrap" style="display: none;">
+          <h4>Last 7 days</h4>
+          <div id="dayChart" class="day-chart"></div>
+        </div>
+      </div>
+
       <form id="surveyForm" class="survey-form" novalidate>
         <fieldset>
           <legend>Contact</legend>
@@ -447,11 +469,62 @@
 
         <div id="surveyStatus" class="survey-status" aria-live="polite"></div>
       </form>
+
+      <!-- Thank-you / success screen -->
+      <div id="thankYou" class="thank-you" style="display: none;">
+        <div class="thank-icon">✅</div>
+        <h3>Thank you, <span id="ty_name">friend</span>!</h3>
+        <p>Your survey for <strong id="ty_business">the store</strong> has been saved.</p>
+        <p class="ty-stats" id="ty_stats"></p>
+        <div class="ty-actions">
+          <button type="button" class="btn" id="ty_another">+ Log another visit</button>
+          <button type="button" class="btn secondary" id="ty_dashboard">View dashboard</button>
+        </div>
+      </div>
     </div>
 
-    <div class="note">
-      <strong>Setup status:</strong> <span id="setupStatus">checking…</span>
-      <span id="setupDetail"></span>
+    <!-- Daily visits dashboard -->
+    <div class="card dashboard-card" id="dashboardCard" style="display: none;">
+      <h2>📈 Daily visits</h2>
+      <p class="muted">Snapshot of recent survey activity from the Google Sheet.</p>
+
+      <div class="dash-grid">
+        <div class="dash-stat big">
+          <span class="dash-num" id="dash_total">—</span>
+          <span class="dash-lbl">Total visits</span>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-num" id="dash_today">—</span>
+          <span class="dash-lbl">Today</span>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-num" id="dash_week">—</span>
+          <span class="dash-lbl">Last 7 days</span>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-num" id="dash_website">—</span>
+          <span class="dash-lbl">Want website</span>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-num" id="dash_app">—</span>
+          <span class="dash-lbl">Want app</span>
+        </div>
+      </div>
+
+      <div class="dash-section">
+        <h4>Last 7 days</h4>
+        <div id="dashChart" class="day-chart large"></div>
+      </div>
+
+      <div class="dash-section">
+        <h4>By store type</h4>
+        <div id="dashStoreType" class="bar-list"></div>
+      </div>
+
+      <div class="dash-section">
+        <h4>By role</h4>
+        <div id="dashRole" class="bar-list"></div>
+      </div>
     </div>
   </section>
 </main>
