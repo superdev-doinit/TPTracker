@@ -12,7 +12,7 @@
  *  8. Execute as: Me
  *  9. Who has access: Anyone
  * 10. Click Deploy → copy the Web App URL
- * 11. Paste that URL into js/app.js → SURVEY_CONFIG.endpoint
+ * 11. Paste that URL into js/app.js → SURVEY_ENDPOINT
  *
  * That's it. Every form submission appends a new row to your Sheet.
  */
@@ -28,6 +28,8 @@ function doPost(e) {
         'Timestamp',
         'Name',
         'Phone',
+        'Role',
+        'Store / Business Name',
         'Store Type',
         'Store Type Other',
         'Length (cm)',
@@ -48,6 +50,8 @@ function doPost(e) {
       new Date(),
       data.name || '',
       data.phone || '',
+      data.role || '',
+      data.businessName || '',
       data.storeType || '',
       data.storeTypeOther || '',
       data.length || '',

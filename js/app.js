@@ -274,6 +274,8 @@ ready(function () {
     if (!data.name || !data.name.trim()) return 'Name is required.';
     if (!data.phone || !data.phone.trim()) return 'Phone is required.';
     if (!/^[0-9 +\-]{7,15}$/.test(data.phone.trim())) return 'Phone looks invalid.';
+    if (!data.role) return 'Please select a role (Owner, Manager, or Worker).';
+    if (!data.businessName || !data.businessName.trim()) return 'Store / business name is required.';
     if (!data.storeType) return 'Please select a store type.';
     if (data.storeType === 'Other' && (!data.storeTypeOther || !data.storeTypeOther.trim()))
       return 'Please describe the store type.';
