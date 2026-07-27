@@ -37,7 +37,7 @@ ready(function () {
 
   // --- Calculator ---
   const $ = (id) => document.getElementById(id);
-  const inputs = ['length','width','gsm','sheets','rate','other','ws_mark','ret_mark'];
+  const inputs = ['length','width','gsm','sheets','rate','other','transport','ws_mark','ret_mark'];
 
   function round2(x) { return Math.round(x * 100) / 100; }
 
@@ -48,13 +48,14 @@ ready(function () {
     const S = parseFloat($('sheets').value) || 0;
     const R = parseFloat($('rate').value) || 0;
     const O = parseFloat($('other').value) || 0;
+    const T = parseFloat($('transport').value) || 0;
     const Wsm = parseFloat($('ws_mark').value) || 0;
     const Rm = parseFloat($('ret_mark').value) || 0;
 
     const weight = (L * W * GSM * S) / 10000;
     const perKg = weight > 0 ? 1000 / weight : 0;
     const paperCost = perKg > 0 ? R / perKg : 0;
-    const total = paperCost + O;
+    const total = paperCost + O + T;
     const ws = total + Wsm;
     const ret = total + Rm;
 
@@ -62,6 +63,7 @@ ready(function () {
     $('r_per_kg').textContent = perKg > 0 ? perKg.toFixed(1) : '—';
     $('r_paper').textContent = paperCost.toFixed(2);
     $('r_other').textContent = O.toFixed(2);
+    $('r_transport').textContent = T.toFixed(2);
     $('r_total').textContent = total.toFixed(2);
     $('r_ws').textContent = ws.toFixed(2);
     $('r_ret').textContent = ret.toFixed(2);
@@ -113,6 +115,7 @@ ready(function () {
       $('sheets').value = 100;
       $('rate').value = 60;
       $('other').value = 2;
+      $('transport').value = 0;
       $('ws_mark').value = 2;
       $('ret_mark').value = 4;
       calc();
